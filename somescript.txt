@@ -1,0 +1,1319 @@
+local v0 = game.Players.LocalPlayer;
+if (v0.Character == nil) then
+	v0.CharacterAdded:Wait();
+	v0.Character:WaitForChild("Humanoid");
+	v0.Character:WaitForChild("HumanoidRootPart");
+end
+local v1 = game:GetService("ReplicatedStorage");
+local v2 = game:GetService("RunService");
+local v3 = game:GetService("UserInputService");
+local v4 = v1:WaitForChild("Timer");
+local v5 = workspace:WaitForChild("Filter");
+local v6 = v5:WaitForChild("ScrapSpawns");
+local v7 = game:GetService("Workspace"):WaitForChild("Debris"):WaitForChild("Traps");
+local v8 = v1:WaitForChild("CurrentLightingProperties");
+local v9 = 50;
+local v10 = "rbxassetid://13519683179";
+local v11 = v10;
+local v12 = UDim2.new(0.822025776, 0, 0.0401606411, 0);
+local v13 = UDim2.new(0, v9, 0, v9);
+local v14 = Instance.new("ScreenGui");
+local v15 = Instance.new("Frame");
+local v16 = Instance.new("ImageButton");
+v14.Name = "mian";
+v14.Parent = game:WaitForChild("CoreGui");
+v14.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
+v15.Name = "100x100";
+v15.Parent = v14;
+v15.BackgroundColor3 = Color3.fromRGB(25, 25, 25);
+v15.Position = v12;
+v15.Size = UDim2.new(0, 40, 0, 34);
+v15.BackgroundTransparency = 1;
+v16.Parent = v15;
+v16.BackgroundColor3 = Color3.fromRGB(25, 25, 25);
+v16.Size = v13;
+v16.Image = v11;
+v16.BackgroundTransparency = 1;
+v16.Draggable = true;
+v16.MouseButton1Down:connect(function()
+	local v73 = game:service("VirtualInputManager");
+	v73:SendKeyEvent(true, "F6", false, game);
+	local v73 = game:service("VirtualInputManager");
+	v73:SendKeyEvent(false, "F6", false, game);
+end);
+local v33 = loadstring(game:HttpGet("https://raw.githubusercontent.com/lyyaini/lon/main/lsuilss"))();
+local v34 = v33:Window("Shark 丨The Rake｜(懒了嘿嘿", Color3.fromRGB(102, 255, 153), Enum.KeyCode.F6);
+local v35 = {ScrapLabels={},SupplyDropLabels={},PlayersLabels={},WaypointLabels={},RakeLabels={},RakeInfoLabel=nil,FlareGunLabels={}};
+local v36 = {["安全屋"]=Vector3.new(-352.336, 16.1844, 63.7742),["发电站"]=Vector3.new(-311.052, 21.2032, -209.896),["商店"]=Vector3.new(-24.9913, 16.3039, -252.213),["观察塔"]=Vector3.new(33.1612, 16.209, -45.1087),["仓库"]=Vector3.new(-75.4166, 16.7219, 214.085)};
+local v37 = {sprint=false,scrapESP=false,rakeESP=false,playerESP=false,flaregunESP=false,flaregunNotification=false,supplydropESP=false,bypassSupplyDropLock=false,stunstickModifier=false,uvlampModifier=false,flashlightModifier=false,fullbright=false,nofog=false,alwaysDay=false,alwaysNight=false,waypoints=false,showRakeInfo=false,infiniteStamina=false,noFallDamage=false,viewCameras=false,timer=false,powerLevel=false,stunstickAura=false,unlockThirdPerson=false};
+local v38 = 0;
+local v39;
+v39 = hookmetamethod(game.StarterGui, "__namecall", function(v74, ...)
+	local v75 = getnamecallmethod();
+	if (v75 == "SetCore") then
+		v38 = v38 + 1;
+		return nil;
+	end
+	return v39(v74, ...);
+end);
+local function v40()
+	local v76 = {};
+	for v253, v254 in pairs(v6:GetChildren()) do
+		if (v254:FindFirstChildOfClass("Model") and v254:FindFirstChildOfClass("Model"):FindFirstChild("Scrap")) then
+			table.insert(v76, v254:FindFirstChildOfClass("Model").Scrap);
+		end
+	end
+	return v76;
+end
+function viewSupplyDropItems(v77)
+	local v78 = Library:CreateSupplyDropUI();
+	local v79 = v77.Items_Folder;
+	for v255, v256 in pairs(v79:GetChildren()) do
+		v78[v255].Image = "rbxassetid://" .. v256.ImageID.Value;
+		if (v256.Taken.Value == true) then
+			v78[v255]:Destroy();
+		end
+	end
+end
+function bypassSupplyDropLock(v80)
+	for v258, v259 in pairs(getconnections(v80.GUIPart.ProximityPrompt.Triggered)) do
+		v259:Disable();
+	end
+	local v81;
+	v81 = v80.GUIPart.ProximityPrompt.Triggered:Connect(function(v260)
+		if ((v260 == v0) and not v80.DB_Folder:FindFirstChild(v0.Name)) then
+			local v335 = Library:CreateSupplyDropUI();
+			local v336 = v80.Items_Folder;
+			for v357, v358 in pairs(v336:GetChildren()) do
+				v335[v357].Image = "rbxassetid://" .. v358.ImageID.Value;
+				v335[v357].Modal = true;
+				if (v358.Taken.Value == true) then
+					v335[v357].Visible = false;
+				else
+					local v433;
+					v433 = v335[v357].MouseButton1Click:Connect(function()
+						v1.SupplyClientEvent:FireServer("Collect", v358.Name);
+						v433:Disconnect();
+						v335:Destroy();
+					end);
+				end
+			end
+		end
+	end);
+end
+local v41 = {Scrap=Color3.fromRGB(160, 190, 255),Rake=Color3.fromRGB(255, 0, 0),["Flare Gun"]=Color3.fromRGB(0, 170, 255),["Supply Crate"]=Color3.fromRGB(85, 170, 0),Player=Color3.fromRGB(90, 255, 40),Waypoint=Color3.fromRGB(255, 247, 0)};
+local v42 = {Player="Player",Waypoint="Waypoint"};
+local function v43(v82, v83, v84, v85)
+	if (v83 == "Scrap") then
+		table.insert(v35.ScrapLabels, v82);
+	elseif (v83 == "Rake") then
+		table.insert(v35.RakeLabels, v82);
+	elseif (v83 == "Flare Gun") then
+		table.insert(v35.FlareGunLabels, v82);
+	elseif (v83 == "Supply Crate") then
+		table.insert(v35.SupplyDropLabels, v82);
+	elseif v84 then
+		table.insert(v35.PlayersLabels, v82);
+	elseif v85 then
+		table.insert(v35.WaypointLabels, v82);
+	end
+end
+local function v44(v86, v87, v88, v89)
+	local v90 = v86.Parent:FindFirstChild("Humanoid");
+	if (v90 == nil) then
+		v90 = false;
+	else
+		v90 = true;
+	end
+	if (v86.Size == nil) then
+		warn("Invalid object was tried to ESP! Ignored.");
+		return;
+	end
+	local v91 = nil;
+	local v92 = false;
+	local v93 = false;
+	if v41[v87] then
+		v91 = v41[v87];
+	elseif (v89 == v42.Player) then
+		v91 = v41[v42.Player];
+		v92 = true;
+	elseif (v89 == v42.Waypoint) then
+		v91 = v41[v42.Waypoint];
+		v93 = true;
+	end
+	local v94 = Instance.new("BillboardGui");
+	v94.Parent = v86;
+	v94.Adornee = v86;
+	v94.AlwaysOnTop = true;
+	v94.Size = UDim2.new(1, 1, 1);
+	v94.Name = "Isguied";
+	v94.Active = true;
+	v94.Enabled = true;
+	v94.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
+	v43(v94, v87, v92, v93);
+	local v104 = Instance.new("TextLabel");
+	v104.Parent = v94;
+	v104.Size = UDim2.new(1, 1, 1);
+	v104.TextColor3 = v91;
+	v104.Active = true;
+	v104.Text = v87;
+	v104.ZIndex = 1;
+	v104.Visible = true;
+	v104.BackgroundTransparency = 1;
+	v104.TextStrokeTransparency = 1;
+	v104.Name = "Label";
+	if v90 then
+		v94.ExtentsOffset = Vector3.new(0, 2.7, 0);
+	end
+	if v88 then
+		if v90 then
+			local v362 = v86.Parent:GetDescendants();
+			for v424, v425 in pairs(v362) do
+				if v425:IsA("BasePart") then
+					local v444 = Instance.new("BoxHandleAdornment");
+					v444.Size = v425.Size + Vector3.new(0.1, 0.1, 0.1);
+					v444.Name = "ESPPart";
+					v444.Adornee = v425;
+					v444.AlwaysOnTop = true;
+					v444.ZIndex = 5;
+					v444.Transparency = 0.5;
+					v444.Color3 = v91;
+					v444.Parent = v425;
+					v43(v444, v87, v92, v93);
+				end
+			end
+		else
+			local v363 = Instance.new("BoxHandleAdornment");
+			v363.Size = v86.Size + Vector3.new(0.1, 0.1, 0.1);
+			v363.Name = "ESPPart";
+			v363.Adornee = v86;
+			v363.AlwaysOnTop = true;
+			v363.ZIndex = 5;
+			v363.Transparency = 0.5;
+			v363.Color3 = v91;
+			v363.Parent = v86;
+			v43(v363, v87, v92, v93);
+		end
+	end
+end
+function indexAllScraps()
+	for v261, v262 in pairs(v40()) do
+		if not v262:FindFirstChild("Isguied") then
+			v44(v262, "Scrap", true);
+		end
+	end
+end
+function addScrapLabel(v115)
+	if not v115:FindFirstChild("Isguied") then
+		v44(v115, "Scrap", true);
+	end
+end
+function setupScrapDetection()
+	for v263, v264 in pairs(v6:GetChildren()) do
+		v264.ChildAdded:Connect(function(v316)
+			if v37.scrapESP then
+				addScrapLabel(v316:WaitForChild("Scrap"));
+			end
+		end);
+	end
+	print("Scrap detection has been loaded!");
+end
+function destroyScrapLabels()
+	for v265, v266 in pairs(v35.ScrapLabels) do
+		v266:Destroy();
+	end
+end
+function indexRake()
+	local v116 = workspace:FindFirstChild("Rake");
+	if v116 then
+		if not v116.HumanoidRootPart:FindFirstChild("Isguied") then
+			if v37.rakeESP then
+				v44(v116.HumanoidRootPart, "Rake", true);
+			end
+			if v116:FindFirstChild("AttackHitbox") then
+				v116.AttackHitbox.Size = Vector3.new(2048, 2048, 2048);
+			end
+		end
+	end
+end
+function addRakeLabel(v117)
+	if v37.rakeESP then
+		if not v117.HumanoidRootPart:FindFirstChild("Isguied") then
+			v44(v117.HumanoidRootPart, "Rake", true);
+			if v117:FindFirstChild("AttackHitbox") then
+				v117.AttackHitbox.Size = Vector3.new(2048, 2048, 2048);
+			end
+		end
+	end
+	v117:WaitForChild("Head");
+	if v37.showRakeInfo then
+		if not v35.RakeInfoLabel then
+			local v372 = Instance.new("BillboardGui");
+			local v373 = Instance.new("TextLabel");
+			local v374 = Instance.new("UITextSizeConstraint");
+			local v375 = Instance.new("TextLabel");
+			local v376 = Instance.new("UITextSizeConstraint");
+			v372.Parent = v117.Head;
+			v372.Active = true;
+			v372.AlwaysOnTop = true;
+			v372.LightInfluence = 1;
+			v372.Size = UDim2.new(5, 0, 3, 0);
+			v372.StudsOffsetWorldSpace = Vector3.new(0, 2, 0);
+			v373.Name = "HPStatus";
+			v373.Parent = v372;
+			v373.AnchorPoint = Vector2.new(0.5, 0.5);
+			v373.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
+			v373.BackgroundTransparency = 1;
+			v373.Position = UDim2.new(0.5, 0, 0.200000003, 0);
+			v373.Size = UDim2.new(0.75757575, 0, 0.316455692, 0);
+			v373.Font = Enum.Font.SourceSans;
+			v373.Text = "HP: 500";
+			v373.TextColor3 = Color3.fromRGB(255, 255, 255);
+			v373.TextScaled = true;
+			v373.TextSize = 14;
+			v373.TextStrokeColor3 = Color3.fromRGB(255, 255, 255);
+			v373.TextWrapped = true;
+			v374.Parent = v373;
+			v375.Name = "Stunned";
+			v375.Parent = v372;
+			v375.AnchorPoint = Vector2.new(0.5, 0.5);
+			v375.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
+			v375.BackgroundTransparency = 1;
+			v375.Position = UDim2.new(0.5, 0, 0.5, 0);
+			v375.Size = UDim2.new(0.75757575, 0, 0.316455692, 0);
+			v375.Font = Enum.Font.SourceSans;
+			v375.Text = "Stunned: No";
+			v375.TextColor3 = Color3.fromRGB(255, 255, 255);
+			v375.TextScaled = true;
+			v375.TextSize = 14;
+			v375.TextStrokeColor3 = Color3.fromRGB(255, 255, 255);
+			v375.TextWrapped = true;
+			v376.Parent = v375;
+			v35.RakeInfoLabel = v372;
+		end
+	end
+end
+function setupRakeDetection()
+	workspace.ChildAdded:Connect(function(v267)
+		if (v267.Name == "Rake") then
+			v267:WaitForChild("HumanoidRootPart");
+			addRakeLabel(v267);
+		end
+	end);
+	print("Rake detection has been loaded!");
+end
+function destroyRakeLabel()
+	if v35.RakeLabels then
+		for v337, v338 in pairs(v35.RakeLabels) do
+			v338:Destroy();
+		end
+		v35.RakeLabel = {};
+	end
+end
+function indexAllPlayers()
+	if v37.playerESP then
+		local v318 = game.Players:GetPlayers();
+		for v339, v340 in pairs(v318) do
+			if (v340.Name ~= v0.Name) then
+				local v426 = v340.Character;
+				if (v426 and v426:FindFirstChild("HumanoidRootPart")) then
+					if not v426.HumanoidRootPart:FindFirstChild("Isguied") then
+						v44(v426.HumanoidRootPart, v340.Name, true, v42.Player);
+					end
+				end
+			end
+		end
+	end
+end
+function addPlayerLabel(v118)
+	if (v118 and v118:FindFirstChild("HumanoidRootPart")) then
+		if not v118.HumanoidRootPart:FindFirstChild("Isguied") then
+			v44(v118.HumanoidRootPart, v118.Name, true, v42.Player);
+		end
+	end
+end
+function setupPlayerDetection()
+	v2.RenderStepped:Connect(function()
+		indexAllPlayers();
+	end);
+	print("Player detection has been loaded!");
+end
+function destroyPlayerLabels()
+	print("Called destroy players");
+	for v268, v269 in pairs(v35.PlayersLabels) do
+		v269:Destroy();
+		print("destroyed in players");
+	end
+	v35.PlayersLabels = {};
+end
+function indexFlareGun()
+	local v120 = workspace:FindFirstChild("FlareGunPickUp");
+	if v120 then
+		if not v120:FindFirstChild("Isguied") then
+			v44(v120, "Flare Gun", true);
+			if v37.flaregunNotification then
+				Library:CreateNotification("Flare Gun Spawned!", "You can now teleport to the flare gun!", 5);
+			end
+		end
+	end
+end
+function addFlareGunLabel(v121)
+	if not v121:FindFirstChild("Isguied") then
+		v44(v121, "Flare Gun", true);
+	end
+end
+function setupFlareGunDetection()
+	v2.RenderStepped:Connect(function()
+		indexFlareGun();
+	end);
+	print("Flare Gun Detection has been loaded!");
+end
+function destroyFlareGunLabel()
+	if v35.FlareGunLabels then
+		for v341, v342 in pairs(v35.FlareGunLabels) do
+			v342:Destroy();
+		end
+		v35.FlareGunLabels = {};
+	end
+end
+function createWaypoints()
+	for v270, v271 in pairs(v36) do
+		local v272 = Instance.new("Part");
+		v272.Transparency = 1;
+		v272.Anchored = true;
+		v272.CanCollide = false;
+		v272.Position = v271;
+		v272.Parent = workspace;
+		v44(v272, v270, false, v42.Waypoint);
+	end
+end
+function destroyWaypoints()
+	for v278, v279 in pairs(v35.WaypointLabels) do
+		v279.Parent:Destroy();
+	end
+	v35.WaypointLabels = {};
+end
+function indexAllSupplyDrops()
+	local v123 = workspace.Debris.SupplyCrates;
+	for v280, v281 in pairs(v123:GetChildren()) do
+		if (v281.Name == "Box") then
+			if not v281.HitBox:FindFirstChild("Isguied") then
+				if v37.supplydropESP then
+					v44(v281.HitBox, "Supply Crate", true);
+				end
+				Library:CreateNotification("Supply crate spawned!", "You can now view items in the supply crate", 5);
+			end
+			if v37.bypassSupplyDropLock then
+				bypassSupplyDropLock(v281);
+			end
+		end
+	end
+end
+function setupSupplyDropDetection()
+	local v124 = workspace.Debris.SupplyCrates;
+	v124.ChildAdded:Connect(function(v282)
+		if (v282.Name == "Box") then
+			if not v282.HitBox:FindFirstChild("Isguied") then
+				if v37.supplydropESP then
+					v44(v282.HitBox, "Supply Crate", true);
+				end
+				Library:CreateNotification("Supply crate spawned!", "You can now view items in the supply crate", 5);
+				if v37.bypassSupplyDropLock then
+					bypassSupplyDropLock(v282);
+				end
+			end
+		end
+	end);
+	print("Supply Drop Detection has been loaded!");
+end
+function destroySupplyDropLabels()
+	for v283, v284 in pairs(v35.SupplyDropLabels) do
+		v284:Destroy();
+	end
+end
+function hookInfiniteStamina()
+	for v285, v286 in pairs(getloadedmodules()) do
+		if (v286.Name == "M_H") then
+			local v343 = require(v286);
+			local v344;
+			v344 = hookfunction(v343.TakeStamina, function(v416, v417)
+				if (v417 > 0) then
+					return v344(v416, -0.5);
+				end
+				return v344(v416, v417);
+			end);
+		end
+	end
+	Library:CreateNotification("Notice", "To disable infinite stamina, you need to disable this and then reset your character!", 5);
+end
+function hookNoFallDamage()
+	local v125;
+	v125 = hookmetamethod(game, "__namecall", function(...)
+		local v287 = getnamecallmethod();
+		local v288 = {...};
+		if (v287 == "FireServer") then
+			if (tostring(...) == "FD_Event") then
+				return;
+			end
+		end
+		return v125(...);
+	end);
+end
+function modifyCurrentStunStick()
+	local v126 = v0.Backpack:FindFirstChild("StunStick") or v0.Character:FindFirstChild("StunStick");
+	if (v126 == nil) then
+		return;
+	end
+	if v126:FindFirstChild("Modified") then
+		return;
+	end
+	task.wait(1);
+	v0.Character.Humanoid:EquipTool(v126);
+	task.wait(1);
+	for v289, v290 in pairs(getconnections(v126.Activated)) do
+		v290:Disable();
+	end
+	v126.Activated:Connect(function()
+		local v291 = v0.Character.Humanoid:LoadAnimation(v126.SwingAnim);
+		v291:Play();
+		v126.Event:FireServer("S");
+		if workspace:FindFirstChild("Rake") then
+			if workspace.Rake:FindFirstChild("Torso") then
+				for v437 = 0, 20, 1 do
+					v126.Event:FireServer("H", workspace.Rake.Torso);
+				end
+			end
+		end
+	end);
+	local v127 = Instance.new("BoolValue");
+	v127.Name = "Modified";
+	v127.Parent = v126;
+end
+function modifyCurrentUVLamp()
+	local v130 = v0.Backpack:FindFirstChild("UV_Lamp") or v0.Character:FindFirstChild("UV_Lamp");
+	if (v130 == nil) then
+		return;
+	end
+	if v130:FindFirstChild("Modified") then
+		return;
+	end
+	task.wait(1);
+	v0.Character.Humanoid:EquipTool(v130);
+	task.wait(1);
+	for v292, v293 in pairs(getconnections(v130.Activated)) do
+		v293:Disable();
+	end
+	v130.Activated:Connect(function()
+		v130.Event:FireServer();
+	end);
+	local v131 = Instance.new("BoolValue");
+	v131.Name = "Modified";
+	v131.Parent = v130;
+end
+function modifyCurrentFlashlight()
+	local v134 = v0.Backpack:FindFirstChild("Flashlight") or v0.Character:FindFirstChild("Flashlight");
+	if (v134 == nil) then
+		v134 = v0.Backpack:FindFirstChild("UpgradedFlashlight") or v0.Character:FindFirstChild("UpgradedFlashlight");
+	end
+	if (v134 == nil) then
+		return;
+	end
+	if v134:FindFirstChild("Modified") then
+		return;
+	end
+	v134.Handle.Flashlight.Light.Light1.Brightness = 10;
+	v134.Handle.Flashlight.Light.Light1.Angle = 100;
+	local v137 = Instance.new("BoolValue");
+	v137.Name = "Modified";
+	v137.Parent = v134;
+end
+local v45 = false;
+function handleBackpackAdd(v140)
+	print("New Backpack object was added!");
+	if (v140.Name == "StunStick") then
+		if v37.stunstickModifier then
+			if not v140:FindFirstChild("Modified") then
+				modifyCurrentStunStick();
+			end
+		end
+	elseif (v140.Name == "UV_Lamp") then
+		if v37.uvlampModifier then
+			if not v140:FindFirstChild("Modified") then
+				modifyCurrentUVLamp();
+			end
+		end
+	elseif ((v140.Name == "Flashlight") or (v140.Name == "UpgradedFlashlight")) then
+		if v37.flashlightModifier then
+			if not v140:FindFirstChild("Modified") then
+				modifyCurrentFlashlight();
+			end
+		end
+	end
+end
+function setupBackpackAddedEvent()
+	v0.Backpack.ChildAdded:Connect(function(v294)
+		if v294:IsA("Tool") then
+			handleBackpackAdd(v294);
+		end
+	end);
+	print("Backpack Added Event has been loaded!");
+end
+local v46 = nil;
+function createTheTimer()
+	v46 = Library:CreateTimerUI();
+end
+function timerLoop()
+	v46.Visible = true;
+	local v142 = v4.Value;
+	local v143 = string.format("%02i:%02i", (v142 / 60) % 60, v142 % 60);
+	v46.Text = v143;
+end
+function disableTimer()
+	v46.Visible = false;
+end
+function setupTimerLoop()
+	v4:GetPropertyChangedSignal("Value"):Connect(function()
+		if v37.timer then
+			timerLoop();
+		end
+	end);
+end
+local v47 = false;
+local v48 = false;
+function collectScraps()
+	if ((v48 == false) and (v47 == false)) then
+		v47 = true;
+		v48 = true;
+		if (#v40() == 0) then
+			Library:CreateNotification("No Scraps Found!", "There are currently no spawned scraps!", 5);
+			v47 = false;
+			v48 = false;
+			return;
+		end
+		for v345, v346 in pairs(v40()) do
+			if (v0.Character:FindFirstChild("Humanoid") and v0.Character:FindFirstChild("Humanoid").SeatPart) then
+				v0.Character:FindFirstChild("Humanoid").Sit = false;
+			end
+			if (v38 >= 3) then
+				Library:CreateNotification("Farming Stopped!", "We have stopped to prevent your death! You will have 1 minute cooldown!", 5);
+				break;
+			end
+			task.wait(0.1);
+			v0.Character.HumanoidRootPart.CFrame = v346.CFrame;
+			if not (v346 == nil) then
+				if (v38 >= 3) then
+					Library:CreateNotification("Farming Stopped!", "We have stopped to prevent your death! You will have 1 minute cooldown!", 5);
+					break;
+				end
+				task.wait(0.5);
+				v0.Character.HumanoidRootPart.CFrame = v346.CFrame;
+			end
+			task.wait(1);
+		end
+		if (v38 >= 3) then
+			task.spawn(function()
+				task.wait(60);
+				v47 = false;
+				v38 = 0;
+			end);
+		else
+			v47 = false;
+		end
+		v48 = false;
+	elseif (v48 == true) then
+		Library:CreateNotification("The Farm is Running", "You are now collecting scraps", 5);
+	elseif (v47 == true) then
+		Library:CreateNotification("Debaunce!", "You are on cooldown!", 5);
+	end
+end
+function collectFlareGun()
+	local v146 = workspace:FindFirstChild("FlareGunPickUp");
+	if v146 then
+		local v320 = v146.FlareGun;
+		v0.Character.HumanoidRootPart.CFrame = v320.CFrame;
+		Library:CreateNotification("Collected!", "If you don't have the flare gun just click on it again!", 5);
+	else
+		Library:CreateNotification("No Flare Gun Spawned!", "There is no flare gun spawned", 5);
+	end
+end
+function addToRakeInfo(v147)
+	local v148 = Instance.new("BillboardGui");
+	local v149 = Instance.new("TextLabel");
+	local v150 = Instance.new("UITextSizeConstraint");
+	local v151 = Instance.new("TextLabel");
+	local v152 = Instance.new("UITextSizeConstraint");
+	v148.Parent = v147.Head;
+	v148.Active = true;
+	v148.AlwaysOnTop = true;
+	v148.LightInfluence = 1;
+	v148.Size = UDim2.new(5, 0, 3, 0);
+	v148.StudsOffsetWorldSpace = Vector3.new(0, 2, 0);
+	v149.Name = "HPStatus";
+	v149.Parent = v148;
+	v149.AnchorPoint = Vector2.new(0.5, 0.5);
+	v149.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
+	v149.BackgroundTransparency = 1;
+	v149.Position = UDim2.new(0.5, 0, 0.200000003, 0);
+	v149.Size = UDim2.new(0.75757575, 0, 0.316455692, 0);
+	v149.Font = Enum.Font.SourceSans;
+	v149.Text = "HP: 500";
+	v149.TextColor3 = Color3.fromRGB(255, 255, 255);
+	v149.TextScaled = true;
+	v149.TextSize = 14;
+	v149.TextStrokeColor3 = Color3.fromRGB(255, 255, 255);
+	v149.TextWrapped = true;
+	v150.Parent = v149;
+	v151.Name = "Stunned";
+	v151.Parent = v148;
+	v151.AnchorPoint = Vector2.new(0.5, 0.5);
+	v151.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
+	v151.BackgroundTransparency = 1;
+	v151.Position = UDim2.new(0.5, 0, 0.5, 0);
+	v151.Size = UDim2.new(0.75757575, 0, 0.316455692, 0);
+	v151.Font = Enum.Font.SourceSans;
+	v151.Text = "Stunned: No";
+	v151.TextColor3 = Color3.fromRGB(255, 255, 255);
+	v151.TextScaled = true;
+	v151.TextSize = 14;
+	v151.TextStrokeColor3 = Color3.fromRGB(255, 255, 255);
+	v151.TextWrapped = true;
+	v152.Parent = v151;
+	v35.RakeInfoLabel = v148;
+end
+function updateRakeInfo()
+	if v35.RakeInfoLabel then
+		local v323 = workspace:FindFirstChild("Rake");
+		if (v323 and v323:FindFirstChild("Monster")) then
+			v35.RakeInfoLabel.HPStatus.Text = "HP: " .. v323.Monster.Health;
+			if (v323.Monster.WalkSpeed <= 0) then
+				v35.RakeInfoLabel.Stunned.Text = "Stunned: Yes";
+			else
+				v35.RakeInfoLabel.Stunned.Text = "Stunned: No";
+			end
+		end
+	else
+		local v324 = workspace:FindFirstChild("Rake");
+		if v324 then
+			v324:WaitForChild("Head");
+			if (#v35.RakeLabels <= 0) then
+				if v37.rakeESP then
+					v44(v324.HumanoidRootPart, "Rake", true);
+				end
+			end
+			if not v35.RakeInfoLabel then
+				addToRakeInfo(v324);
+			end
+		end
+	end
+end
+function destroyRakeInfo()
+	v35.RakeInfoLabel:Destroy();
+end
+function setupRakeInfoLoop()
+	v2.RenderStepped:Connect(function()
+		if v37.showRakeInfo then
+			indexRake();
+			updateRakeInfo();
+		end
+	end);
+end
+local v49 = workspace:WaitForChild("Map"):WaitForChild("Cameras");
+v49 = v49:GetChildren();
+local v50 = 1;
+local v51 = v49[1];
+function handleCameraInput(v192)
+	if (v192.KeyCode == Enum.KeyCode.Q) then
+		if ((v50 - 1) > 0) then
+			v51 = v49[v50 - 1];
+			v50 = -1;
+		else
+			v50 = #v49;
+			v51 = v49[v50];
+		end
+	elseif (v192.KeyCode == Enum.KeyCode.E) then
+		if ((v50 + 1) <= #v49) then
+			v51 = v49[v50 + 1];
+			v50 = v50 + 1;
+		else
+			v50 = 1;
+			v51 = v49[v50];
+		end
+	end
+end
+function updateCameraCFrame()
+	if (v51 ~= nil) then
+		workspace.CurrentCamera.CFrame = v51.DefaultPosition.CFrame + (v51.DefaultPosition.CFrame.LookVector * 1.5);
+	end
+end
+function setupViewCameraLoop()
+	v3.InputBegan:Connect(function(v295, v296)
+		if v296 then
+			return;
+		end
+		if v37.viewCameras then
+			handleCameraInput(v295);
+		end
+	end);
+	v2.RenderStepped:Connect(function()
+		if v37.viewCameras then
+			updateCameraCFrame();
+		end
+	end);
+end
+local v52 = nil;
+function createPowerLevel()
+	v52 = Library:CreatePowerLevelUI();
+end
+function updatePowerLevel()
+	v52.Visible = true;
+	v52.Text = "Power Level: " .. v1.PowerValues.PowerLevel.Value;
+end
+function destroyPowerLevel()
+	v52.Visible = false;
+end
+function setupPowerLevelLoop()
+	v2.RenderStepped:Connect(function()
+		if v37.powerLevel then
+			updatePowerLevel();
+		end
+	end);
+end
+function updateWalkSpeed()
+	if v37.sprint then
+		v0.Character.Humanoid.WalkSpeed = 30;
+	end
+end
+function setupWalkSpeedLoop()
+	v2.RenderStepped:Connect(function()
+		updateWalkSpeed();
+	end);
+end
+local v53 = false;
+function auraLoop()
+	local v196 = workspace:FindFirstChild("Rake");
+	if v196 then
+		if v196:FindFirstChild("HumanoidRootPart") then
+			local v421 = v0.Character:FindFirstChild("StunStick");
+			if v421 then
+				if ((v0.Character.HumanoidRootPart.Position - v196.HumanoidRootPart.Position).Magnitude <= 12) then
+					if (v53 == false) then
+						v421.Event:FireServer("S");
+						v421.Event:FireServer("H", workspace.Rake.Torso);
+						v53 = true;
+						task.wait(0.5);
+						v53 = false;
+					end
+				end
+			end
+		end
+	end
+end
+function setupAuraLoop()
+	v2.RenderStepped:Connect(function()
+		if v37.stunstickAura then
+			auraLoop();
+		end
+	end);
+end
+function modifySafehouseDoor()
+	for v297, v298 in pairs(getconnections(game:GetService("Workspace").Map.SafeHouse.Door.Door.DoorGUIPart.ProximityPrompt.Triggered)) do
+		v298:Disable();
+	end
+	game:GetService("Workspace").Map.SafeHouse.Door.Door.DoorGUIPart.ProximityPrompt.Triggered:Connect(function(v299)
+		if (v299 == game.Players.LocalPlayer) then
+			workspace.Map.SafeHouse.Door.RemoteEvent:FireServer("Door");
+		end
+	end);
+end
+function updateVisualsToAlwaysDay()
+	for v300, v301 in pairs(v1.DayProperties:GetChildren()) do
+		game.Lighting[v301.Name] = v301.Value;
+		if v8:FindFirstChild(v301.Name) then
+			v8[v301.Name].Value = v301.Value;
+		end
+	end
+end
+function setupAlwaysDayLoop()
+	v2.RenderStepped:Connect(function()
+		if v37.alwaysDay then
+			updateVisualsToAlwaysDay();
+		end
+	end);
+end
+function updateVisualsToAlwaysNight()
+	for v304, v305 in pairs(v1.NightProperties:GetChildren()) do
+		game.Lighting[v305.Name] = v305.Value;
+		if v8:FindFirstChild(v305.Name) then
+			v8[v305.Name].Value = v305.Value;
+		end
+	end
+end
+function setupAlwaysNightLoop()
+	v2.RenderStepped:Connect(function()
+		if v37.alwaysNight then
+			updateVisualsToAlwaysNight();
+		end
+	end);
+end
+function handleNoFogLoop()
+	if v37.nofog then
+		game.Lighting.FogEnd = 999999;
+		v8.FogEnd.Value = 999999;
+	end
+end
+function setupNoFogLoop()
+	v2.RenderStepped:Connect(handleNoFogLoop);
+end
+function updateVisualsToFullbright()
+	game.Lighting.Brightness = 2;
+	v8.Brightness.Value = 2;
+end
+function disableFullbright()
+	game.Lighting.Brightness = 0.45;
+	v8.Brightness.Value = 0.45;
+end
+function handleFullbrightLoop()
+	if v37.fullbright then
+		updateVisualsToFullbright();
+	else
+		disableFullbright();
+	end
+end
+function setupFullbrightLoop()
+	v2.RenderStepped:Connect(handleFullbrightLoop);
+end
+function unlockThirdPersonLoop()
+	if v37.unlockThirdPerson then
+		v0.CameraMaxZoomDistance = 1000;
+	end
+end
+function setupThirdPersonLoop()
+	v2.RenderStepped:Connect(unlockThirdPersonLoop);
+	local v201;
+	v201 = hookmetamethod(game, "__newindex", function(v308, v309, v310)
+		if (not checkcaller() and (v308 == v0) and (v309 == "CameraMaxZoomDistance")) then
+			return v201(v308, v309, 1000);
+		end
+		return v201(v308, v309, v310);
+	end);
+end
+function destroyMapBorders()
+	for v311, v312 in pairs(workspace.Filter.InvisibleWalls:GetChildren()) do
+		v312:Destroy();
+	end
+	Library:CreateNotification("Done!", "All borders around the map were disabled. (Server borders are not possible to remove)", 5);
+end
+function enableNoJumpDelay()
+	v3.JumpRequest:Connect(function()
+		if (v0.Character.Humanoid.FloorMaterial ~= Enum.Material.Air) then
+			v0.Character.Humanoid:ChangeState("Jumping");
+		end
+	end);
+end
+function handleDeath()
+	v0.CharacterAdded:Wait();
+	v0.Character:WaitForChild("HumanoidRootPart");
+	if v37.infiniteStamina then
+		hookInfiniteStamina();
+	end
+	if v37.stunstickModifier then
+		modifyCurrentStunStick();
+	end
+	if v37.uvlampModifier then
+		modifyCurrentUVLamp();
+	end
+	if v37.flashlightModifier then
+		modifyCurrentFlashlight();
+	end
+end
+function setupDeathDetection()
+	v0.Character.Humanoid.Died:Connect(function()
+		handleDeath();
+		setupDeathDetection();
+	end);
+end
+function updateSettings()
+	writefile("RakeEvolvedV2/settings.json", game.HttpService:JSONEncode(v37));
+end
+local v54 = nil;
+if isfolder("RakeEvolvedV2") then
+	if isfile("RakeEvolvedV2/settings.json") then
+		v54 = readfile("RakeEvolvedV2/settings.json");
+		v54 = game.HttpService:JSONDecode(v54);
+	end
+else
+	makefolder("RakeEvolvedV2");
+	local v313 = v37;
+	v313 = game.HttpService:JSONEncode(v313);
+	writefile("RakeEvolvedV2/settings.json", v313);
+	v54 = v313;
+end
+local v55 = v34:Tab("显示功能");
+local v56 = v34:Tab("基础功能");
+local v57 = v34:Tab("其他功能");
+local v58 = v34:Tab("支持游戏传送");
+local v59 = false;
+v55:Toggle("rake透视", false, function(v202)
+	v37.rakeESP = v202;
+	if (v202 == true) then
+		indexRake();
+		if (v59 == false) then
+			setupRakeDetection();
+			v59 = true;
+		end
+	else
+		destroyRakeLabel();
+	end
+	updateSettings();
+end);
+local v60 = false;
+v55:Toggle("碎片/废铁透视", false, function(v204)
+	v37.scrapESP = v204;
+	if (v204 == true) then
+		indexAllScraps();
+		if (v60 == false) then
+			setupScrapDetection();
+			v60 = true;
+		end
+	else
+		destroyScrapLabels();
+	end
+	updateSettings();
+end);
+local v61 = false;
+v55:Toggle("补给透视", false, function(v206)
+	v37.supplydropESP = v206;
+	if (v206 == true) then
+		indexAllSupplyDrops();
+		if (v61 == false) then
+			setupSupplyDropDetection();
+			v61 = true;
+		end
+	else
+		destroySupplyDropLabels();
+	end
+	updateSettings();
+end);
+local v62 = false;
+v55:Toggle("玩家显示", false, function(v208)
+	v37.playerESP = v208;
+	if (v208 == true) then
+		indexAllPlayers();
+		if (v62 == false) then
+			setupPlayerDetection();
+			v62 = true;
+		end
+	else
+		destroyPlayerLabels();
+	end
+	updateSettings();
+end);
+local v63 = false;
+v55:Button("信号枪显示", false, function(v210)
+	loadstring(game:HttpGet("https://pastebin.com/raw/SmHtgRxM"))();
+end);
+local v64 = false;
+v56:Toggle("明亮", false, function(v214)
+	v37.fullbright = v214;
+	if (v214 == true) then
+		if (v64 == false) then
+			setupFullbrightLoop();
+			v64 = true;
+		end
+	end
+	updateSettings();
+end);
+local v65 = false;
+v56:Toggle("除雾", false, function(v216)
+	v37.nofog = v216;
+	if (v216 == true) then
+		if (v65 == false) then
+			setupNoFogLoop();
+			v65 = true;
+		end
+	end
+	updateSettings();
+end);
+local v66 = false;
+v56:Toggle("一直白天", false, function(v218)
+	v37.alwaysDay = v218;
+	if (v218 == true) then
+		if (v66 == false) then
+			setupAlwaysDayLoop();
+			v66 = true;
+		end
+	end
+	updateSettings();
+end);
+local v67 = false;
+v56:Toggle("一直晚上", false, function(v220)
+	v37.alwaysNight = v220;
+	if (v220 == true) then
+		if (v67 == false) then
+			setupAlwaysNightLoop();
+			v67 = true;
+		end
+	end
+	updateSettings();
+end);
+v56:Toggle("房屋点显示", false, function(v222)
+	v37.waypoints = v222;
+	if (v222 == true) then
+		createWaypoints();
+	else
+		destroyWaypoints();
+	end
+	updateSettings();
+end);
+local v68 = false;
+v56:Toggle("解锁靶信息", false, function(v224)
+	v37.showRakeInfo = v224;
+	if (v224 == true) then
+		local v330 = workspace:FindFirstChild("Rake");
+		if v330 then
+			addToRakeInfo(v330);
+		end
+		if (v59 == false) then
+			setupRakeDetection();
+			v59 = true;
+		end
+		if (v68 == false) then
+			setupRakeInfoLoop();
+			v68 = true;
+		end
+	else
+		destroyRakeInfo();
+	end
+	updateSettings();
+end);
+local v69 = false;
+v56:Toggle("第三人称", false, function(v226)
+	v37.unlockThirdPerson = v226;
+	if (v226 == true) then
+		if (v69 == false) then
+			setupThirdPersonLoop();
+			v69 = true;
+		end
+	end
+	updateSettings();
+end);
+v56:Toggle("无限耐力", false, function(v228)
+	v37.infiniteStamina = v228;
+	if (v228 == true) then
+		hookInfiniteStamina();
+	end
+	updateSettings();
+end);
+v56:Toggle("无坠落伤害", false, function(v230)
+	v37.noFallDamage = v230;
+	if (v230 == true) then
+		hookNoFallDamage();
+	end
+	updateSettings();
+end);
+local v70 = false;
+v57:Toggle("计算器", false, function(v232)
+	v37.timer = v232;
+	if (v232 == true) then
+		if (v46 == nil) then
+			createTheTimer();
+			v46.Visible = true;
+		end
+		if (v70 == false) then
+			setupTimerLoop();
+			v70 = true;
+		end
+	else
+		v46:Destroy();
+		v46 = nil;
+	end
+	updateSettings();
+end);
+local v71 = false;
+v57:Toggle("供应电能", false, function(v234)
+	v37.powerLevel = v234;
+	if (v234 == true) then
+		createPowerLevel();
+		v52.Visible = true;
+		if (v71 == false) then
+			setupPowerLevelLoop();
+			v71 = true;
+		end
+	else
+		destroyPowerLevel();
+	end
+	updateSettings();
+end);
+local v72 = false;
+v57:Toggle("眩晕棒光环", false, function(v236)
+	v37.stunstickAura = v236;
+	if (v236 == true) then
+		if (v72 == false) then
+			setupAuraLoop();
+			v72 = true;
+		end
+	end
+	updateSettings();
+end);
+v57:Toggle("电源下降锁", false, function(v238)
+	v37.bypassSupplyDropLock = v238;
+	if (v238 == true) then
+		indexAllSupplyDrops();
+	end
+	updateSettings();
+end);
+v57:Button("查看空投信息", function()
+	local v240 = workspace.Debris.SupplyCrates;
+	if v240:FindFirstChild("Box") then
+		local v332;
+		if (#v240:GetChildren() >= 2) then
+			for v430, v431 in pairs(v240:GetChildren()) do
+				if v431:FindFirstChild("UnlockValue") then
+					if ((v431.UnlockValue.Value <= 0) or not v431.DB_Folder:FindFirstChild(v0.Name)) then
+						v332 = v431;
+						break;
+					end
+				end
+			end
+		else
+			v332 = v240.Box;
+		end
+		viewSupplyDropItems(v332);
+	else
+		Library:CreateNotification("没有空投", "人机当前没有空投", 5);
+	end
+	updateSettings();
+end);
+v57:Toggle("特技棒修改", false, function(v241)
+	v37.stunstickModifier = v241;
+	if (v241 == true) then
+		modifyCurrentStunStick();
+		if (v45 == false) then
+			setupBackpackAddedEvent();
+			v45 = true;
+		end
+	end
+	updateSettings();
+end);
+v57:Toggle("UV灯修改", false, function(v243)
+	v37.uvlampModifier = v243;
+	if (v243 == true) then
+		modifyCurrentUVLamp();
+		if (v45 == false) then
+			setupBackpackAddedEvent();
+			v45 = true;
+		end
+	end
+	updateSettings();
+end);
+v57:Toggle("手电筒修改", false, function(v245)
+	v37.flashlightModifier = v245;
+	if (v245 == true) then
+		modifyCurrentFlashlight();
+		if (v45 == false) then
+			setupBackpackAddedEvent();
+			v45 = true;
+		end
+	end
+	updateSettings();
+end);
+v57:Button("提升画质", function()
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/lyyaini/lon/main/hua"))();
+end);
+v57:Button("动态模糊", function()
+	loadstring(game:HttpGet("https://pastebin.com/raw/puLxBkVB"))();
+end);
+v58:Textbox("自定义间隔时间", false, function(v247)
+	jian = v247;
+end);
+v58:Textbox("音量大小调节", false, function(v248)
+	long = v248;
+end);
+v58:Dropdown("音乐列表", {"国歌","黑手哥你咋那么自私","黑手哥脸给多了","特朗普","美猴王","大河之剑天上来","黑手哥草你马","傻逼","奥利给","华强买瓜1","黄袍加身"}, function(v249)
+	if (v249 == "国歌") then
+		lol = "rbxassetid://1845918407";
+	elseif (v249 == "黑手哥你咋那么自私") then
+		lol = "rbxassetid://7334239757";
+	elseif (v249 == "黑手哥脸给多了") then
+		lol = "rbxassetid://7418609387";
+	elseif (v249 == "特朗普") then
+		lol = "rbxassetid://7757832628";
+	elseif (v249 == "美猴王") then
+		lol = "rbxassetid://8195914641";
+	elseif (v249 == "大河之剑天上来") then
+		lol = "rbxassetid://7801102946";
+	elseif (v249 == "黑手哥草你马") then
+		lol = "rbxassetid://7418628592";
+	elseif (v249 == "傻逼") then
+		lol = "rbxassetid://7908417389";
+	elseif (v249 == "奥利给") then
+		lol = "rbxassetid://5945531874";
+	elseif (v249 == "华强买瓜1") then
+		lol = "rbxassetid://7309537814";
+		wait(3);
+		lol = "rbxassetid://7309543982";
+	elseif (v249 == "黄袍加身") then
+		lol = "rbxassetid://6086894326";
+	end
+end);
+v58:Toggle("播放音乐", false, function(v250)
+	if v250 then
+		getgenv().place = true;
+		while getgenv().place do
+			wait();
+			local v353 = Instance.new("Sound");
+			v353.Parent = workspace;
+			v353.SoundId = lol;
+			v353.Volume = long;
+			v353:Play();
+			v353.Ended:Connect(function()
+				print("Sound h👻🇺🇸as finished playing!");
+			end);
+			wait(jian);
+		end
+	else
+		getgenv().place = false;
+		wait();
+		sound:Stop();
+	end
+end);
+v58:Button("重进当前游戏", function()
+	game:GetService("TeleportService"):Teleport(game.PlaceId);
+end);
+v57:Toggle("穿墙", false, function(v252)
+	if v252 then
+		Noclip = true;
+		Stepped = game.RunService.Stepped:Connect(function()
+			if (Noclip == true) then
+				for v442, v443 in pairs(game.Workspace:GetChildren()) do
+					if (v443.Name == game.Players.LocalPlayer.Name) then
+						for v453, v454 in pairs(game.Workspace[game.Players.LocalPlayer.Name]:GetChildren()) do
+							if v454:IsA("BasePart") then
+								v454.CanCollide = false;
+							end
+						end
+					end
+				end
+			else
+				Stepped:Disconnect();
+			end
+		end);
+	else
+		Noclip = false;
+	end
+end);
+_G.RakeEvolvedShutDownFunction = function()
+	destroyFlareGunLabel();
+	destroyRakeInfo();
+	destroyRakeLabel();
+	destroyPowerLevel();
+	destroyScrapLabels();
+	destroyWaypoints();
+	destroySupplyDropLabels();
+	game.CoreGui.NewUI:Destroy();
+	script:Destroy();
+end;
+game.Lighting.BloodHourColor:Destroy();
+modifySafehouseDoor();
+setupDeathDetection();
+enableNoJumpDelay();
